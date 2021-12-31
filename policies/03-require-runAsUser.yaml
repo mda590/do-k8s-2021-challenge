@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-pod-runasuser
+  annotations:
+    policies.kyverno.io/title: Require the RunAsUser to be Specified
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Requires Pods to specify as runAsUser value within their containers which are not root.
+spec:
+  validationFailureAction: enforce
+  background: false
+  rules:
+  - name: check-userid
+    match:
+      resources:
+        kinds:
+        - Pod
+    validate:
+      message:  >-
+        The field spec.containers.*.securityContext.runAsUser must specified and greater than zero.
+      pattern:
+        spec:
+          containers:
+          - securityContext:
+              runAsUser: ">0"

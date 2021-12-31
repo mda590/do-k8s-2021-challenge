@@ -1,0 +1,29 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-business-labels
+  annotations:
+    policies.kyverno.io/title: Require Business Labels
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Label
+    policies.kyverno.io/description: >-
+      Define required labels used by our internal business processes to understand which applications
+      are running in each cluster, and used to handle chargeback activities for resources consumed
+      by this specific application.
+spec:
+  validationFailureAction: enforce
+  background: false
+  rules:
+  - name: check-for-business-labels
+    match:
+      resources:
+        kinds:
+        - Pod
+    validate:
+      message: "The labels `labels.acmecorp.com/costCenter` and `labels.acmecorp.com/department` are required."
+      pattern:
+        metadata:
+          labels:
+            labels.acmecorp.com/costCenter: "?*"
+            labels.acmecorp.com/department: "?*"

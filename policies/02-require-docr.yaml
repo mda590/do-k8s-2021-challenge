@@ -1,0 +1,38 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-image-registries
+  annotations:
+    policies.kyverno.io/title: Restrict Image Registries and Latest
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Requires all images for pods be sourced from the Digital Ocean Container Registry. Any other
+      image sources are denied.
+spec:
+  validationFailureAction: enforce
+  background: false
+  rules:
+  - name: validate-registries
+    match:
+      resources:
+        kinds:
+        - Pod
+    validate:
+      message: "Unknown image registry."
+      pattern:
+        spec:
+          containers:
+          - image: "registry.digitalocean.com/*"
+  - name: validate-image-tag
+    match:
+      resources:
+        kinds:
+        - Pod
+    validate:
+      message: "Must not use the tag `latest` on any images."
+      pattern:
+        spec:
+          containers:
+          - image: "!*:latest"
